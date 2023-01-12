@@ -1,8 +1,10 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AuthStack } from "types/screens";
+import { BottomNavigator } from "./BottomNavigator";
 
 export type AuthNavigatorParams = {
+  [AuthStack.bottomStack]: undefined;
 };
 
 const Stack = createNativeStackNavigator<AuthNavigatorParams>();

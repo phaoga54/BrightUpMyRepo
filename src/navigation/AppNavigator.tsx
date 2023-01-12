@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { UnAuthNavigator } from "./UnAuthStack";
 import { AppStack } from "types/screens";
+import { AuthNavigator } from "./AuthNavigator";
 
 export type AppNavigatorParams = { 
   [AppStack.unAuthStack]: undefined;
@@ -16,7 +17,7 @@ export const AppNavigator = () => {
       initialRouteName={AppStack.unAuthStack}
       screenOptions={{ headerShown: false, animation: "none" }}>
       <Stack.Screen name={AppStack.unAuthStack} component={UnAuthNavigator} />
-      {/* <Stack.Screen name={AppStack.authStack} component={AuthNavigator} /> */}
+      <Stack.Screen name={AppStack.authStack} component={AuthNavigator} />
     </Stack.Navigator>
   );
 };

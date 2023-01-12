@@ -20,20 +20,22 @@ import { SocialLoginButton } from 'components/social-login-button';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { UnAuthNavigatorParams } from 'navigation/UnAuthStack';
-import { UnAuthStack } from 'types/screens';
+import { AppStack, UnAuthStack } from 'types/screens';
+import { AppNavigatorParams } from 'navigation/AppNavigator';
 
 export const LoginScreen = () => {
   const { width, height } = useWindowDimensions()
   const [username, setUserName] = useState('')
   const [password, setPassword] = useState('')
   const [errorPassword, setErrorPassword] = useState('')
-  const navigation = useNavigation<NativeStackNavigationProp<UnAuthNavigatorParams>>()
+  const navigation = useNavigation<NativeStackNavigationProp<any>>()
 
   const onLogin = () => {
     if (!errorPassword) {
       setErrorPassword('Wrong password')
       return
     }
+    navigation.navigate(AppStack.authStack)
   }
   const goToForgotPassword = () =>  navigation.navigate(UnAuthStack.forgotPassword)
   const goToSignUp = () =>  navigation.navigate(UnAuthStack.signUp)

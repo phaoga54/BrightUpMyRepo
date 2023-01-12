@@ -17,7 +17,14 @@ export enum AuthStack {
 }
 
 export enum BottomStack { 
+  homeStack="Home",
+  brightStack="Bright",
+  plusButton="PlusButton",
+  subscriptionStack="Subs",
+  likeStack="Likes",
+
 }
 
 export enum HomeStack { 
+  homeScreen="homeScreen"
 } 
