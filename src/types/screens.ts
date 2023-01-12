@@ -8,6 +8,7 @@ export enum UnAuthStack {
   signUp = "signUp",
   signUpSuccess = "signUpSuccess",
   forgotPassword = "forgotPassword",
+  createNewPassword = "createNewPassword",
   forgotPasswordSuccess = "forgotPasswordSuccess",
 }
 
