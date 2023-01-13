@@ -23,6 +23,7 @@ export const BottomNavigator = memo(() => {
       tabBar={props => <TabBarComponent {...props} />}
       screenOptions={{
         headerShown: false,
+        tabBarStyle:{backgroundColor:'green'},
       }}>
       <Tab.Screen
         name={BottomStack.homeStack}
