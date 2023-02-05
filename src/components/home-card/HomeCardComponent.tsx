@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
     titleText: { color: '#3D3D3D', fontFamily: poppins.bold, fontSize: 16, marginLeft: 5 },
     container: {
         paddingHorizontal: 20,
-        marginTop: 10
+        marginTop: 10,
+        paddingBottom:10,
     }
 });

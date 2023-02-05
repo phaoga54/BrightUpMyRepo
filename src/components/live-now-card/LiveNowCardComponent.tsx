@@ -38,10 +38,10 @@ export const LiveNowCardComponent = React.memo(({ item }: Props) => {
 
 const styles = StyleSheet.create({
     viewerText: { fontFamily: poppins.semiBold, fontSize: 9, color: 'white' },
-    titleText: { fontFamily: montserrat.semiBold, fontSize: 13, color: 'white' },
     viewersContainer: { paddingHorizontal: 6, paddingVertical: 4, backgroundColor: '#C400C4', borderRadius: 45, alignSelf: 'flex-start' },
+    titleText: { fontFamily: montserrat.semiBold, fontSize: 13, color: 'white' },
     avatar:{ width: 24, height: 24, borderRadius: 24 },
-    nameText: { fontFamily: montserrat.medium, fontSize: 12, color: 'white' },
+    nameText: { fontFamily: montserrat.medium, fontSize: 12, color: 'white',marginLeft:3 },
     container: {
         width: 165,
         height: 200,

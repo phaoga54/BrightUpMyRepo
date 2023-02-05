@@ -4,7 +4,7 @@ import { HomeHeaderComponent } from 'components/home-header';
 import { LiveNowCardComponent } from 'components/live-now-card';
 import { TagComponent } from 'components/tag';
 import { VideoThumbnailComponent } from 'components/video-player-thumbnail';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -15,7 +15,13 @@ import {
   View,
 } from 'react-native';
 import TrendingSvg from 'assets/svgs/Trending.svg'
+import BrightIconSvg from 'assets/svgs/BrightIcon.svg'
 import { TrendingCardComponent } from 'components/trending-card';
+import { BrightCardComponent } from 'components/bright-card';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { HomeNavigatorParams } from 'navigation/HomeNavigator';
+import { HomeStack } from 'types/screens';
 
 const TAGS = [
   { title: 'All' },
@@ -32,107 +38,163 @@ const TAGS = [
 
 const FAKE_LIVE_NOW = [
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-5.fna.fbcdn.net/v/t39.30808-6/308051349_822795498735234_6626717630756918029_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=174925&_nc_ohc=8Fmasc6zJyUAX94un-r&_nc_ht=scontent.fhan2-5.fna&oh=00_AfDoar89-KUxxST6zA9LP6Vaicqz74TAUNg3ZEdVJquhTA&oe=63C5B5D1'
+    imageUrl: 'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8&w=1000&q=80'
   },
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-3.fna.fbcdn.net/v/t1.6435-9/127278824_425480728466715_4074811955057404138_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=174925&_nc_ohc=8Xgwz-NRM8YAX-w04II&_nc_ht=scontent.fhan2-3.fna&oh=00_AfCpnCcKA35yG_NFypvrstf1hOHgMfsIlezvqx6E99yd_A&oe=63E7B09E'
+    imageUrl: 'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8&w=1000&q=80'
   },
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
-    views: 25,
-    title: 'Weekly Mood Outfit 2023',
-    imageUrl: 'https://scontent.fhan2-3.fna.fbcdn.net/v/t1.6435-9/84153863_227270748287715_8886420183057432576_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=730e14&_nc_ohc=eQOaIeTKO2QAX88-ozj&_nc_ht=scontent.fhan2-3.fna&oh=00_AfAQTu8AcIm9hOAFoxviawlW2h82hmD0IV3KMVbL5ZwvEg&oe=63E7D24C'
-  },
-  {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-5.fna.fbcdn.net/v/t1.6435-9/83747697_227270548287735_8957592584335654912_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=730e14&_nc_ohc=SUWR9DQZ_3gAX-vE3Kn&_nc_ht=scontent.fhan2-5.fna&oh=00_AfCwK2C-0XJ6rVzclzfrPpv7BwLwzD0FHMA6HEXxh7hQdA&oe=63E7E49A'
+    imageUrl: 'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8&w=1000&q=80'
   },
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t1.6435-9/49076984_131113484570109_8635049538362540032_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=8bfeb9&_nc_ohc=IPjN5Oyv6WEAX89SHc6&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA7rv07EhtlvLC4xzLFM5C4uV8jL2kLym6snGa-Ahsdng&oe=63E7B530'
+    imageUrl: 'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8&w=1000&q=80'
   },
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/275486791_699198924428226_7860055960221269278_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=174925&_nc_ohc=lpsnPUnvOVsAX_4iaxL&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfAKzTz5u0anXRAyJDzov0i6fR0nLkT3oP0lX1sRVCV5Fw&oe=63C48762'
+    imageUrl: 'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8&w=1000&q=80'
   },
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/275486791_699198924428226_7860055960221269278_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=174925&_nc_ohc=lpsnPUnvOVsAX_4iaxL&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfAKzTz5u0anXRAyJDzov0i6fR0nLkT3oP0lX1sRVCV5Fw&oe=63C48762'
+    imageUrl: 'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8&w=1000&q=80'
+  },
+  {
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
+    views: 25,
+    title: 'My Go-To Eyeshadow Look',
+    imageUrl: 'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8&w=1000&q=80'
+  },
+  {
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
+    views: 25,
+    title: 'My Go-To Eyeshadow Look',
+    imageUrl: 'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8&w=1000&q=80'
+  },
+  {
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
+    views: 25,
+    title: 'My Go-To Eyeshadow Look',
+    imageUrl: 'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8&w=1000&q=80'
+  },
+  {
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
+    views: 25,
+    title: 'My Go-To Eyeshadow Look',
+    imageUrl: 'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8&w=1000&q=80'
+  },
+  {
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
+    views: 25,
+    title: 'My Go-To Eyeshadow Look',
+    imageUrl: 'https://images.unsplash.com/photo-1436891620584-47fd0e565afb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8&w=1000&q=80'
   }
 
 ]
 
 const FAKE_TRENDING = [
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F'
+    imageUrl: 'https://media.istockphoto.com/id/920377882/photo/beautiful-landscape-with-high-mountains-with-illuminated-peaks-stones-in-mountain-lake.jpg?b=1&s=170667a&w=0&k=20&c=MC2f_T1Tioyi4gzm62JeohBuEMEiyM5UTgcQYMBrVjo='
   },
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
-    views: 25,
-    title: 'Weekly Mood Outfit 2023',
-    imageUrl: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F'
-  },
-  {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F'
+    imageUrl: 'https://media.istockphoto.com/id/920377882/photo/beautiful-landscape-with-high-mountains-with-illuminated-peaks-stones-in-mountain-lake.jpg?b=1&s=170667a&w=0&k=20&c=MC2f_T1Tioyi4gzm62JeohBuEMEiyM5UTgcQYMBrVjo='
   },
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F'
+    imageUrl: 'https://media.istockphoto.com/id/920377882/photo/beautiful-landscape-with-high-mountains-with-illuminated-peaks-stones-in-mountain-lake.jpg?b=1&s=170667a&w=0&k=20&c=MC2f_T1Tioyi4gzm62JeohBuEMEiyM5UTgcQYMBrVjo='
   },
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F'
+    imageUrl: 'https://media.istockphoto.com/id/920377882/photo/beautiful-landscape-with-high-mountains-with-illuminated-peaks-stones-in-mountain-lake.jpg?b=1&s=170667a&w=0&k=20&c=MC2f_T1Tioyi4gzm62JeohBuEMEiyM5UTgcQYMBrVjo='
   },
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F'
+    imageUrl: 'https://media.istockphoto.com/id/920377882/photo/beautiful-landscape-with-high-mountains-with-illuminated-peaks-stones-in-mountain-lake.jpg?b=1&s=170667a&w=0&k=20&c=MC2f_T1Tioyi4gzm62JeohBuEMEiyM5UTgcQYMBrVjo='
   },
   {
-    avatar: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F',
-    name: 'Nguyễn Hường',
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
     views: 25,
     title: 'My Go-To Eyeshadow Look',
-    imageUrl: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t39.30808-6/320176924_449785517365034_1986348079644495676_n.jpg?stp=cp6_dst-jpg&_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=QRFExzLNNjQAX8vZ2K3&tn=qZJEVaUWPqc06J6g&_nc_ht=scontent.fhan2-4.fna&oh=00_AfA9TVedpWcc93P9sVvk-KI2AERv9BFnKgVpi_xStqp4ZQ&oe=63C50D5F'
-  }
+    imageUrl: 'https://media.istockphoto.com/id/920377882/photo/beautiful-landscape-with-high-mountains-with-illuminated-peaks-stones-in-mountain-lake.jpg?b=1&s=170667a&w=0&k=20&c=MC2f_T1Tioyi4gzm62JeohBuEMEiyM5UTgcQYMBrVjo='
+  },
+  {
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
+    views: 25,
+    title: 'My Go-To Eyeshadow Look',
+    imageUrl: 'https://media.istockphoto.com/id/920377882/photo/beautiful-landscape-with-high-mountains-with-illuminated-peaks-stones-in-mountain-lake.jpg?b=1&s=170667a&w=0&k=20&c=MC2f_T1Tioyi4gzm62JeohBuEMEiyM5UTgcQYMBrVjo='
+  },
+  {
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
+    views: 25,
+    title: 'My Go-To Eyeshadow Look',
+    imageUrl: 'https://media.istockphoto.com/id/920377882/photo/beautiful-landscape-with-high-mountains-with-illuminated-peaks-stones-in-mountain-lake.jpg?b=1&s=170667a&w=0&k=20&c=MC2f_T1Tioyi4gzm62JeohBuEMEiyM5UTgcQYMBrVjo='
+  },
+  {
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
+    views: 25,
+    title: 'My Go-To Eyeshadow Look',
+    imageUrl: 'https://media.istockphoto.com/id/920377882/photo/beautiful-landscape-with-high-mountains-with-illuminated-peaks-stones-in-mountain-lake.jpg?b=1&s=170667a&w=0&k=20&c=MC2f_T1Tioyi4gzm62JeohBuEMEiyM5UTgcQYMBrVjo='
+  },
+  {
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
+    views: 25,
+    title: 'My Go-To Eyeshadow Look',
+    imageUrl: 'https://media.istockphoto.com/id/920377882/photo/beautiful-landscape-with-high-mountains-with-illuminated-peaks-stones-in-mountain-lake.jpg?b=1&s=170667a&w=0&k=20&c=MC2f_T1Tioyi4gzm62JeohBuEMEiyM5UTgcQYMBrVjo='
+  },
+  {
+    avatar: 'https://scontent.fhan3-2.fna.fbcdn.net/v/t39.30808-1/296786220_2439025969571080_2252975622957619417_n.jpg?stp=cp6_dst-jpg_p320x320&_nc_cat=107&ccb=1-7&_nc_sid=7206a8&_nc_ohc=2E-QpppvisYAX_FCFNg&_nc_ht=scontent.fhan3-2.fna&oh=00_AfA_uDVde_b2kh3ezFPQsmSUuOjN6gD3qXq5mS5BBXeqHw&oe=63CEFD7C',
+    name: 'Username',
+    views: 25,
+    title: 'My Go-To Eyeshadow Look',
+    imageUrl: 'https://media.istockphoto.com/id/920377882/photo/beautiful-landscape-with-high-mountains-with-illuminated-peaks-stones-in-mountain-lake.jpg?b=1&s=170667a&w=0&k=20&c=MC2f_T1Tioyi4gzm62JeohBuEMEiyM5UTgcQYMBrVjo='
+  },
 
 ]
 
@@ -145,6 +207,15 @@ const Icon = <View style={{
 export const HomeScreen = () => {
   const { width, height } = useWindowDimensions()
   const [selected, setSelected] = useState(0)
+  const navigation = useNavigation<NativeStackNavigationProp<HomeNavigatorParams>>()
+
+  const goToLiveNow = useCallback(()=>{
+    navigation.navigate(HomeStack.liveNowListScreen)
+  }, [])
+  const goToTrending = useCallback(()=>{
+    navigation.navigate(HomeStack.trendingListScreen)
+  }, [])
+
   const renderTag = () => {
     return TAGS.map(({ title }, index) => <TagComponent
       title={title}
@@ -173,7 +244,7 @@ export const HomeScreen = () => {
           <HomeCardComponent
             title='Live Now'
             headerIcon={Icon}
-            onViewAll={() => { }}
+            onViewAll={goToLiveNow}
           >
             <FlatList
               renderItem={({ item }) => <LiveNowCardComponent
@@ -190,7 +261,7 @@ export const HomeScreen = () => {
           <HomeCardComponent
             title='Trending'
             headerIcon={<TrendingSvg />}
-            onViewAll={() => { }}
+            onViewAll={goToTrending}
           >
             <FlatList
               renderItem={({ item }) => <TrendingCardComponent
@@ -203,7 +274,24 @@ export const HomeScreen = () => {
               ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
             />
           </HomeCardComponent>
-          <View style={{height:150}}/>
+
+          <HomeCardComponent
+            title='Brights'
+            headerIcon={<BrightIconSvg stroke={'#C400C4'}/>}
+            onViewAll={() => { }}
+          >
+            <FlatList
+              renderItem={({ item }) => <BrightCardComponent
+                item={item}
+              />}
+              data={FAKE_LIVE_NOW}
+              keyExtractor={(_, index) => 'LiveNow' + index}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
+            />
+          </HomeCardComponent>
+          <View style={{height:50}}/>
         </ScrollView>
       </View>
     </SafeAreaView>

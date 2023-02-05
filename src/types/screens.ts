@@ -1,6 +1,7 @@
 export enum AppStack { 
   authStack="authStack",
-  unAuthStack = "unAuthStack"
+  unAuthStack = "unAuthStack",
+  commonStack = "commonStack"
 }
 
 export enum UnAuthStack {
@@ -26,5 +27,13 @@ export enum BottomStack {
 }
 
 export enum HomeStack { 
-  homeScreen="homeScreen"
+  homeScreen="homeScreen",
+  liveNowListScreen="Live Now",
+  trendingListScreen="Trending",
+  brightScreen="Brights"
+} 
+
+export enum CommonStack { 
+  accountScreen="accountScreen",
+  settingScreen="Settings",
 } 
